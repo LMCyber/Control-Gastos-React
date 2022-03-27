@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Header } from './components/Header'
 import { ListadoGastos } from './components/ListadoGastos'
 import { Modal } from './components/Modal'
+import { Filtros } from './components/Filtros'
 
 import { generarId } from './helpers'
 import IconoNuevoGasto from './img/nuevo-gasto.svg'
@@ -11,8 +12,10 @@ function App () {
   const [isValidPresupuesto, setIsValidPresupuesto] = useState(false)
   const [modal, setModal] = useState(false)
   const [animarModal, setAnimarModal] = useState(false)
-  const [gastos, setGastos] = useState(window.localStorage.getItem('gastos') ? JSON.parse(window.localStorage.getItem('gastos')))
+  const [gastos, setGastos] = useState(window.localStorage.getItem('gastos') ? JSON.parse(window.localStorage.getItem('gastos')) : [])
   const [gastoEditar, setGastoEditar] = useState({})
+  const [filtro, setFiltro] = useState('')
+  const [gastosFiltrados, setGastosFiltrados] = useState('')
 
   useEffect(() => {
     if (Object.keys(gastoEditar).length > 0) {
@@ -31,6 +34,15 @@ function App () {
   useEffect(() => {
     window.localStorage.setItem('gastos', JSON.stringify(gastos) ?? [])
   }, [gastos])
+
+  useEffect(() => {
+    if (filtro) {
+    // Filtrar gastos por categoría
+      const gastosFiltrados = gastos.filter(gasto => gasto.categoria === filtro)
+
+      setGastosFiltrados(gastosFiltrados)
+    }
+  }, [filtro])
 
   useEffect(() => {
     const presupuestoLS = Number(window.localStorage.getItem('presupuesto'))
@@ -78,6 +90,7 @@ function App () {
     <div className={modal ? 'fijar' : ''}>
       <Header
         gastos={gastos}
+        setGastos={setGastos}
         presupuesto={presupuesto}
         setPresupuesto={setPresupuesto}
         isValidPresupuesto={isValidPresupuesto}
@@ -87,10 +100,16 @@ function App () {
       {isValidPresupuesto && (
         <>
           <main>
+            <Filtros
+              filtro={filtro}
+              setFiltro={setFiltro}
+            />
             <ListadoGastos
               gastos={gastos}
               setGastoEditar={setGastoEditar}
               eliminarGasto={eliminarGasto}
+              filtro={filtro}
+              gastosFiltrados={gastosFiltrados}
             />
           </main>
 
